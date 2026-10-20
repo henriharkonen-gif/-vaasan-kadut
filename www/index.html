@@ -101,4 +101,14 @@ try{done=JSON.parse(localStorage.getItem('vaasa_done_v2')||'{}');totalRide=Numbe
 function switchView(view){document.body.dataset.view=view;document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.toggle('nav-active',b.dataset.view===view));window.scrollTo({top:0,behavior:'instant'});if(view==='map')setTimeout(()=>{draw()},70)}
 document.querySelectorAll('.bottom-nav button').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
 switchView('map');
-</script><div style='padding:8px 14px;color:#9db4c9;font-size:12px'>Versio 3.1 · Karttakuvat © OpenStreetMapin tekijät · Kartta tarvitsee verkkoyhteyden. GPS-seuranta toimii vain Safarin ollessa aktiivinen.</div></body></html>
+</script><div style='padding:8px 14px;color:#9db4c9;font-size:12px'>Versio 3.1 · Karttakuvat © OpenStreetMapin tekijät · Kartta tarvitsee verkkoyhteyden. GPS-seuranta toimii vain Safarin ollessa aktiivinen.</div><script>
+document.addEventListener("DOMContentLoaded", () => {
+  const keepAwake = window.Capacitor?.Plugins?.KeepAwake;
+  const start = document.getElementById("start");
+  const stop = document.getElementById("stop");
+  if (!keepAwake || !start || !stop) return;
+  start.addEventListener("click", () => keepAwake.keepAwake().catch(console.warn));
+  stop.addEventListener("click", () => keepAwake.allowSleep().catch(console.warn));
+});
+</script>
+</body></html>
