@@ -20,7 +20,7 @@ body[data-view="achievements"] #achievementsPanel{display:block}
 body[data-view="map"] #status{display:block}
 @media(prefers-color-scheme:light){body{background:#eef4f9;color:#13283c}header small,.muted{color:#51677c}.conquest-strip,.card,.history,.extras{background:#fff;color:#13283c;box-shadow:0 2px 12px #1232}.card span,.extras p,.history p{color:#51677c}.conquest-strip strong{color:#128c63}.bottom-nav{background:#fff;border-color:#d4e0eb}.bottom-nav button{color:#526b80}.bottom-nav button.nav-active{background:#dcecff;color:#125db4}#status{background:#dbe9f7;color:#17364f}input,.extras select{background:#fff;color:#13283c;border-color:#aabfce}.legend,.daynote{color:#425e75}}
 </style></head><body>
-<header><div><h1>🚴 Vaasan kadut</h1><small>Kerää koko katu pyöräilemällä</small></div><button class="secondary" id="locate">⌖ Sijainti</button></header>
+<header><div><h1>🚴 Vaasan kadut</h1><small>Kerää koko katu pyöräilemällä</small></div><button class="secondary" id="locate">⌖ Sijainti</button><button id="loginBtn" class="secondary" type="button">Kirjaudu sisään</button><button id="cloudSaveBtn" class="secondary" type="button">☁️ Tallenna pilveen</button></header>
 <div class="conquest-strip" id="conquestStrip">🚴 Vaasan valloitus <strong id="conquestTop">0,0 %</strong><div class="bar"><div id="progressTop"></div></div></div><div class="stats" id="statsPanel"><div class="card"><span>Vaasan valloitus</span><b id="conquest">0,0 %</b><span>Kerätty osuus katuverkosta</span></div><div class="card"><span>Valmiit kadut</span><b id="streetCount">– / –</b><div class="bar"><div id="progress"></div></div></div><div class="card"><span>Kerätty katuverkko</span><b id="covered">– km</b><span id="remaining">Jäljellä – km</span></div><div class="card"><span>Katuverkko yhteensä</span><b id="total">– km</b></div><div class="card"><span>Pyöräilty GPS:n mukaan</span><b id="ridden">0,00 km</b><span id="today">Tällä kertaa 0,00 km</span></div></div>
 <div class="controls" id="rideControls"><button id="load">⬇ Lataa Vaasan kadut</button><button id="start">▶ Aloita pyöräily</button><button id="stop" class="secondary" disabled>■ Lopeta</button><button id="center" class="secondary">⌖ Keskitä</button><button id="headingMode" class="secondary" type="button">🧭 Suunta: pois</button></div>
 <main class="map-area" id="mapArea"><div class="mapwrap" id="mapwrap"><canvas id="map"></canvas><div class="badge" id="mapbadge">Karttapohja: ladataan…</div><div class="zoom"><button id="plus">+</button><button id="minus">−</button></div></div></main>
@@ -31,7 +31,7 @@ body[data-view="map"] #status{display:block}
 <section class="extras"><h2>📍 Alueiden valloitus (suuntaa-antava)</h2><p>Alueet on arvioitu lähimpien kaupunginosakeskusten perusteella, eivätkä ne vastaa virallisia kaupunginosarajoja.</p><div id="areas">Ladataan…</div></section>
 <section class="extras"><h2>🧭 Uusien katujen lenkkivinkki</h2><p>Valitse tavoite. Sovellus ehdottaa lähistön ajamattomia katuja noin 5, 10 tai 20 kilometrin lenkkiä varten. Tämä on katujen tavoitelista, <strong>ei navigoitava tai turvallisuustarkistettu reitti</strong>. Suunnittele kulkureitti itse.</p><label for="routeLength">Tavoite:</label> <select id="routeLength"><option value="5000">5 km</option><option value="10000">10 km</option><option value="20000">20 km</option></select> <button id="suggestRoute" type="button">Ehdota katuja</button><div id="routeSuggestion"></div></section>
 <section class="extras"><h2>💾 Varmuuskopio</h2><p>Vie sekä kerätyt katuosuudet että ajopäiväkirja yhteen tiedostoon. Säilytä se turvallisessa paikassa. Tuonti korvaa nykyiset tallennetut tiedot.</p><button id="backup" type="button">⬇ Lataa varmuuskopio</button><label style="display:block;margin-top:10px">Palauta varmuuskopio: <input id="restore" type="file" accept=".json,application/json"></label></section><footer>Katu merkitään valmiiksi, kun vähintään 90 % sen kartta-aineiston pituudesta on kerätty. Tämä 10 %:n jousto helpottaa katujen päissä ja GPS-epätarkkuuksissa; se koskee koko kadun pituutta, ei vain päätepisteitä. GPS:n epätarkkuuden vuoksi jokaisesta noin 15–25 metrin osuudesta vaaditaan osuma. Risteykset eivät katkaise samannimistä katua. Samannimiset erilliset kadut voivat yhdistyä laskennassa. Vain GPS-nopeuteen perustuva autolla ajamisen esto ei ole aukoton. Vähänkyrön kadut ja taustakartta peitetään saatavilla olevalla OpenStreetMapin aluerajalla. Jos rajaa ei saada ladattua, käytetään väliaikaista likimääräistä rajausta. Katuverkko: © OpenStreetMap-tekijät (ODbL). Ei sisällä yksityisiä pihateitä eikä kävelypolkuja. Sovellus toimii parhaiten näyttö päällä: iOS voi keskeyttää verkkosivun GPS:n taustalla. Karttapohja ladataan OpenStreetMapin karttatiilistä, katuverkko tallennetaan erikseen. Tiedot tallentuvat vain tähän selaimeen; selaintietojen poisto voi hävittää edistymisen.</footer>
-<script>
+<script>document.addEventListener("DOMContentLoaded",()=>{const b=document.getElementById("loginBtn");if(b)b.addEventListener("click",()=>{window.location.href="firebase-auth.html"})});</script><script>
 'use strict';const $=id=>document.getElementById(id),R=Math.PI/180,EARTH=6371000;let ways=[],streets=new Map(),done={},last=null,position=null,watch=null,session=0,totalRide=0,zoom=1,panX=0,panY=0,center={lat:63.095,lon:21.616},busy=false,drag=null,rideLog=[],activeRide=null,selectedDay="",selectedSegments=new Set();const canvas=$('map'),ctx=canvas.getContext('2d');const fmt=n=>(n/1000).toLocaleString('fi-FI',{minimumFractionDigits:2,maximumFractionDigits:2});function say(s){$('status').textContent=s}function dist(a,b){const x=(b.lon-a.lon)*R*Math.cos((a.lat+b.lat)*R/2),y=(b.lat-a.lat)*R;return Math.hypot(x,y)*EARTH}function merc(p){return {x:p.lon*R*EARTH,y:Math.log(Math.tan(Math.PI/4+p.lat*R/2))*EARTH}}function unmerc(x,y){return {lon:x/EARTH/R,lat:(2*Math.atan(Math.exp(y/EARTH))-Math.PI/2)/R}}function pointSeg(p,a,b){let A=merc(a),B=merc(b),P=merc(p),dx=B.x-A.x,dy=B.y-A.y,t=Math.max(0,Math.min(1,((P.x-A.x)*dx+(P.y-A.y)*dy)/(dx*dx+dy*dy||1)));return Math.hypot(P.x-A.x-t*dx,P.y-A.y-t*dy)}
 // Vähäkyrö (OSM-relaatio 2249140): hae rajapolygoni, tarvittaessa käytä vararajausta.
 const OLD_VAASA_EAST_LIMIT=21.85;
@@ -111,4 +111,19 @@ try{done=JSON.parse(localStorage.getItem('vaasa_done_v2')||'{}');totalRide=Numbe
 function switchView(view){document.body.dataset.view=view;document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.toggle('nav-active',b.dataset.view===view));window.scrollTo({top:0,behavior:'instant'});if(view==='map')setTimeout(()=>{draw()},70)}
 document.querySelectorAll('.bottom-nav button').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
 switchView('map');
-</script><div style='padding:8px 14px;color:#9db4c9;font-size:12px'>Versio 3.1 · Karttakuvat © OpenStreetMapin tekijät · Kartta tarvitsee verkkoyhteyden. GPS-seuranta toimii vain Safarin ollessa aktiivinen.</div></body></html>
+</script><div style='padding:8px 14px;color:#9db4c9;font-size:12px'>Versio 3.1 · Karttakuvat © OpenStreetMapin tekijät · Kartta tarvitsee verkkoyhteyden. GPS-seuranta toimii vain Safarin ollessa aktiivinen.</div><script type="module" src="firebase-sync.js"></script>
+<script>
+document.getElementById("cloudSaveBtn").addEventListener("click", async () => {
+  try {
+    const data = {
+      done: JSON.parse(localStorage.getItem("vaasa_done_v2") || "{}"),
+      totalRide: Number(localStorage.getItem("vaasa_ride_v2") || 0),
+      rideLog: JSON.parse(localStorage.getItem("vaasa_ride_log_v1") || "[]")
+    };
+    await window.tallennaPilveen(data);
+    alert("Pyöräilytiedot tallennettu pilveen!");
+  } catch (e) {
+    alert("Pilvitallennus epäonnistui: " + e.message);
+  }
+});
+</script></body></html>
