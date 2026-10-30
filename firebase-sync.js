@@ -18,6 +18,7 @@ const db = getFirestore(app);
 
 
 async function tallennaPilveen(data) {
+  await auth.authStateReady();
   const user = auth.currentUser;
   if (!user) {
     throw new Error("Kirjaudu ensin sisään.");
@@ -29,6 +30,7 @@ async function tallennaPilveen(data) {
   });
 }
 async function lataaPilvesta() {
+  await auth.authStateReady();
   const user = auth.currentUser;
   if (!user) {
     throw new Error("Kirjaudu ensin sisään.");
