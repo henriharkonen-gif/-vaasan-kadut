@@ -82,7 +82,7 @@ for(let ty=ty0;ty<=ty1;ty++)for(let tx=tx0;tx<=tx1;tx++){
  if(!item){let img=new Image();item={img,state:'loading'};tileCache.set(key,item);
  img.onload=()=>{item.state='ok';tileOk++;requestAnimationFrame(draw)};
  img.onerror=()=>{item.state='error';tileErrors++;if(tileOk===0&&tileErrors>=3)say('Karttakuvien lataus epäonnistui. Tarkista verkkoyhteys ja avaa sivu Safarissa. GPS voi silti toimia.');};
- img.src='https://tile.openstreetmap.org/'+key+'.png';
+ img.src='https://api.maptiler.com/maps/streets-v2/256/'+key+'.png?key=OMA_API_AVAIN';
  }
  if(item.state==='ok')ctx.drawImage(item.img,x,y,size+0.5,size+0.5);
 }
