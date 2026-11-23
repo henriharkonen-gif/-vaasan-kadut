@@ -1,7 +1,8 @@
+import { yhdistaAjot } from "./sync-merge.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 const firebaseConfig = {
-  apiKey: "AIzaSyAr4JqnVE7APrts4-MdBNjfnHlumqmqaaо",
+  apiKey: "AIzaSyAr4JqnVE7APrts4-MdBNjfnhlumqmqaao",
   authDomain: "vaasan-kadut.firebaseapp.com",
   projectId: "vaasan-kadut",
   storageBucket: "vaasan-kadut.firebasestorage.app",
@@ -24,8 +25,13 @@ async function tallennaPilveen(data) {
     throw new Error("Kirjaudu ensin sisään.");
   }
 
-  await setDoc(doc(db, "users", user.uid, "data", "cycling"), {
-    ...data,
+  const ref = doc(db, "users", user.uid, "data", "cycling");
+  const snapshot = await getDoc(ref);
+  const pilvi = snapshot.exists() ? snapshot.data() : null;
+  const yhdistetty = yhdistaAjot(data, pilvi);
+
+  await setDoc(ref, {
+    ...yhdistetty,
     updatedAt: new Date().toISOString()
   });
 }
@@ -44,3 +50,27 @@ async function lataaPilvesta() {
 }
 window.tallennaPilveen = tallennaPilveen;
 window.lataaPilvesta = lataaPilvesta;
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    try {
+      const pilvi = await lataaPilvesta();
+      const paikallinen = {
+        done: JSON.parse(localStorage.getItem("vaasa_done_v2") || "{}"),
+        rideLog: JSON.parse(localStorage.getItem("vaasa_ride_log_v1") || "[]")
+      };
+      console.log("PILVIVERTAILU:", {
+        pilvenKadut: Object.keys(pilvi?.done || {}).length,
+        laitteenKadut: Object.keys(paikallinen.done).length,
+        pilvenAjot: pilvi?.rideLog?.length || 0,
+        laitteenAjot: paikallinen.rideLog.length
+      });
+    } catch (e) {
+      console.warn("Pilvitietojen tarkistus epäonnistui:", e.message);
+    }
+  }
+  const btn = document.getElementById("loginBtn");
+  if (!btn) return;
+  btn.textContent = user ? "✓ Kirjauduttu" : "Kirjaudu sisään";
+  btn.style.backgroundColor = user ? "#198754" : "";
+  btn.style.color = user ? "white" : "";
+});

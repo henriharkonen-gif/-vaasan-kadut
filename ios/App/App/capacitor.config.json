@@ -1,0 +1,8 @@
+{
+	"appId": "fi.vaasankadut.app",
+	"appName": "Vaasan Kadut Pyörällä",
+	"webDir": "www",
+	"packageClassList": [
+		"KeepAwakePlugin"
+	]
+}
